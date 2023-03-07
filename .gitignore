@@ -13,4 +13,4 @@
 **/__pycache__/
 
 # custom.
-database/process/data
+database/postgres/process/data
