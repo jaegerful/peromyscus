@@ -4,7 +4,7 @@ import path, {dirname} from 'path'
 import {fileURLToPath} from 'url'
 
 /* use built-in functions to abstract slashes ordeal. */
-/* '__dirname' represents path of 'sanitize' directory. */
+/* '__dirname' represents absolute path to 'process' directory. */
 
 const url = import.meta.url
 const normalized = fileURLToPath(url)
