@@ -1,4 +1,5 @@
 import pyodbc
+import textwrap
 
 """ establish connection with database. """
 
@@ -14,13 +15,12 @@ cursor = connection.cursor()
 
 """ prompt colony manager for input. """
 
-print("\nmating-pair generator\n")
+print("\ngenerator for non-sibling mating pairs.\n")
 
-stock = input('1. which stock do you need mating pairs for? (e.g. SMLNJ) ')
+stock = input('1. which stock do you want mating pairs for (e.g. SMLNJ)? ')
 stock = stock.strip() # trim string.
-stock = stock.upper() # make string uppercase.
 
-ideal_batch_size = input('\n2. how many pairs do you need (e.g. 25)? ')
+ideal_batch_size = input('2. how many pairs do you need (e.g. 25)? ')
 
 while not ideal_batch_size.isdigit():
     ideal_batch_size = input('that was not a valid number. how many pairs do you need? ')
@@ -74,14 +74,34 @@ while row is not None and cur_batch_size < ideal_batch_size:
 
 """ display generated batch to colony manager. """
 
-print(f'\ngenerated batch for the "{stock}" stock.')
+# if no pairs could be generated.
 
-if (cur_batch_size == ideal_batch_size):
-    print('successfully made ', end = '')
-else:
-    print('only could make ', end = '')
+if (cur_batch_size == 0):
+    message = f"""
+        could not generate any pairs for the stock: "{stock}".
+    
+        this could have happened for several reasons:
 
-print(f'{cur_batch_size} distinct pairs:\n')
+        1. "{stock}" may not exist (capitalization must be right).
+        2. the database may not be up to date.
+        3. there may simply not exist any possible non-sibling pairs.
+    """
+
+    message = textwrap.dedent(message)
+    print(message)
+    
+    quit()
+
+# if at least one pair generated.
+
+message = f"""
+    generated batch for the stock: "{stock}".
+
+    {'successfully made' if (cur_batch_size == ideal_batch_size) else 'only could make '} {cur_batch_size} distinct (male, female) pairs:
+"""
+
+message = textwrap.dedent(message)
+print(message)
 
 for pair in batch:
     print(pair)
