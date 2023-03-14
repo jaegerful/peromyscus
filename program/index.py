@@ -1,12 +1,11 @@
-import pyodbc
-import textwrap
+from pyodbc import connect, SQL_WCHAR
 
 """ establish connection with database. """
 
 dsn = 'DRIVER={postgres};DATABASE=peromyscus;UID=postgres;PWD=password;SERVER=localhost;PORT=5433;'
-connection = pyodbc.connect(dsn)
+connection = connect(dsn)
 
-connection.setdecoding(pyodbc.SQL_WCHAR, encoding = 'utf-8')
+connection.setdecoding(SQL_WCHAR, encoding = 'utf-8')
 connection.setencoding(encoding = 'utf-8')
 
 """ instantiate cursor. """
@@ -74,6 +73,8 @@ while row is not None and cur_batch_size < ideal_batch_size:
 
 """ display generated batch to colony manager. """
 
+from textwrap import dedent
+
 # if no pairs could be generated.
 
 if (cur_batch_size == 0):
@@ -87,23 +88,117 @@ if (cur_batch_size == 0):
         3. there may simply not exist any possible non-sibling pairs.
     """
 
-    message = textwrap.dedent(message)
+    message = dedent(message)
     print(message)
     
     quit()
 
 # if at least one pair generated.
 
-message = f"""
-    generated batch for the stock: "{stock}".
+header = f'batch generated for the stock: "{stock}"'
+status = f'{"successfully made" if (cur_batch_size == ideal_batch_size) else "only could make "} {cur_batch_size} distinct (male, female) pairs:'
 
-    {'successfully made' if (cur_batch_size == ideal_batch_size) else 'only could make '} {cur_batch_size} distinct (male, female) pairs:
+tab = ' ' * 4 # triple-quoted strings convert tabs to spaces.
+batch_as_string = ''.join([('\n' + tab + str(pair)) for pair in batch])
+
+message = f"""
+    {header}
+    {status}
+    {batch_as_string}
 """
 
-message = textwrap.dedent(message)
+message = dedent(message)
+
 print(message)
 
-for pair in batch:
-    print(pair)
+""" send email with batch contents to colony manager. """
 
-print()
+# prompt colony manager for email address.
+
+receiver = None
+
+while True:
+    receiver = input('what email should receive a copy of this batch (e.g. alex@gmail.com)? ')
+    receiver = receiver.strip()
+
+    confirmation = input(f'is this email correct? {receiver} (y/n): ') 
+    confirmation = confirmation.strip()
+    confirmation = confirmation.lower()
+
+    if confirmation == 'y':
+        break
+
+# attempt to send email to specified address.
+
+from dotenv import load_dotenv
+from os import environ
+
+load_dotenv()
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
+
+try:
+
+    with smtplib.SMTP('smtp.gmail.com', 587) as smtp: # can throw error.
+
+        # encrypt connection.
+
+        smtp.starttls()
+        smtp.ehlo()
+
+        # authenticate.
+
+        sender = environ.get('sender')
+        password = environ.get('password')
+
+        smtp.login(sender, password)
+
+        # prepare email.
+
+        email = MIMEMultipart('alternative') 
+        email['Subject'] = header
+
+        ## email as plain text.
+
+        plain = MIMEText(message, 'plain')
+        email.attach(plain)
+
+        ## email as html.
+
+        batch_as_html = ''.join([('<li>' + str(pair) + '</li>') for pair in batch])
+
+        html = f"""
+            <h1 style = 'font-size: 1.2rem'>{header}</h1>
+            <em style = 'font-size: 1.1rem'>{status}</em>
+
+            <ol style = 'font-size: 1rem'>
+                {batch_as_html}
+            </ol>
+        """
+
+        html = MIMEText(html, 'html')
+        email.attach(html)
+
+        # send email.
+
+        smtp.sendmail(sender, receiver, email.as_string())
+
+        print(f'\nbatch was sent successfully to {receiver}.\n')
+
+except:
+    message = f"""
+        an error occurred.
+    
+        this could have happened for several reasons:
+
+        1. this computer is currently offline.
+        2. the email server rejected our connection.
+        3. the internal database this program uses to temporarily store batches failed.
+    """
+
+    message = dedent(message)
+    print(message)
+
+    quit()
