@@ -16,8 +16,8 @@ WITH sires_and_dams AS (
 /* males and females may appear in more than one pair. */
 
 SELECT
-	m.id AS "male_id", 
-	f.id AS "female_id"
+	f.id AS "female_id", /* the colony manager expects (female, male) pairs. */
+	m.id AS "male_id" 
 FROM mice m 
 INNER JOIN mice f 
 ON (

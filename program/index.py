@@ -96,7 +96,7 @@ if (cur_batch_size == 0):
 # if at least one pair generated.
 
 header = f'batch generated for the stock: "{stock}"'
-status = f'{"successfully made" if (cur_batch_size == ideal_batch_size) else "only could make "} {cur_batch_size} distinct (male, female) pairs:'
+status = f'{"successfully made" if (cur_batch_size == ideal_batch_size) else "only could make"} {cur_batch_size} distinct (female, male) pairs:'
 
 tab = ' ' * 4 # triple-quoted strings convert tabs to spaces.
 batch_as_string = ''.join([('\n' + tab + str(pair)) for pair in batch])
