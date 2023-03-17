@@ -36,3 +36,7 @@ receiver = parts.address()
 """ send email to colony manager with batch contents. """
 
 parts.send(receiver, header, status, batch, plain_text_alternative = message_displayed)
+
+""" close connection with database. """
+
+connection.close()
