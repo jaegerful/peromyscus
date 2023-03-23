@@ -23,11 +23,11 @@ parts.query(stock, cursor)
 
 """ make batch. """
 
-batch, cur_batch_size = parts.assemble(cursor, ideal_batch_size)
+batch, cur_batch_size, unique_parents = parts.assemble(cursor, ideal_batch_size)
 
 """ display batch. """
 
-header, status, message_displayed = parts.display(stock, cur_batch_size, ideal_batch_size, batch)
+header, status, schema, message_displayed = parts.display(stock, cur_batch_size, ideal_batch_size, batch, unique_parents)
 
 """ prompt colony manager for email address. """
 
@@ -35,7 +35,7 @@ receiver = parts.address()
 
 """ send email to colony manager with batch contents. """
 
-parts.send(receiver, header, status, batch, plain_text_alternative = message_displayed)
+parts.send(receiver, header, status, schema, batch, plain_text_alternative = message_displayed)
 
 """ close connection with database. """
 

@@ -32,47 +32,120 @@ def query(stock, cursor):
     args = (stock,) # arguments for placeholders in query.
     cursor.execute(query, args)
 
-""" only use pairs with unique mates to assemble batch. """
+""" assemble ideal batch. """
 
 def assemble(cursor, ideal_batch_size):
-    batch = []
-    cur_batch_size = 0
+    
+    """ part one: make 'batch_with_unique_mice'. """
+    
+    batch_with_unique_mice = []
 
-    # hash tables for male and female identifiers. 
-    # used to check if a particular identifer has already been used in 'batch'.
+    # hash tables for mice identifiers. 
+    # used to check if a particular identifer has already been used in batch.
 
-    males = {}
-    females = {}
+    mice = {}
 
-    # iterate through query, until batch is complete.
+    # filter query until batch is complete.
 
     row = cursor.fetchone()
 
-    while row is not None and cur_batch_size < ideal_batch_size:
+    while row is not None:
 
         # if pair consists of unused male and female.
 
-        if ((not row.male_id in males) and (not row.female_id in females)):
+        if ((not row.male_id in mice) and (not row.female_id in mice)):
 
-            # append to 'batch' array.
+            # add to batch.
             
-            batch.append(row)
-            cur_batch_size += 1
+            batch_with_unique_mice.append(row)
 
-            # add identifiers to hash tables.
+            # add identifiers to hash table.
 
-            males[row.male_id] = True
-            females[row.female_id] = True
+            mice[row.male_id] = True
+            mice[row.female_id] = True
         
         row = cursor.fetchone()
+    
+    """ part two: make 'batch_with_unique_mice_and_parents'. """
 
-    return (batch, cur_batch_size)
+    batch_with_unique_mice_and_parents = []
+    cur_batch_size = 0
+
+    # hash table for mating numbers. 
+    # used to check if a particular mating number has already been used in new batch.
+
+    mating_numbers = {}
+
+    # hash table for pairs.
+    # used to check if a particular pair has already been used in new batch.
+
+    # since pairs in new batch have unique mates, either mate's identifier can also identify the pair as a whole.
+
+    pairs = {}
+
+    # filter 'batch_with_unique_mice', until 'batch_with_unique_mice_and_parents' is complete.
+
+    i = 0
+    length = len(batch_with_unique_mice)
+
+    while i < length and cur_batch_size < ideal_batch_size:
+
+        # retrieve row from original batch.
+
+        row = batch_with_unique_mice[i]
+
+        # if both mates have unused parents.
+
+        if ((not row.mating_cage_of_male in mating_numbers) and (not row.mating_cage_of_female in mating_numbers)):
+
+            # add to new batch.
+
+            batch_with_unique_mice_and_parents.append(row)
+            cur_batch_size += 1
+
+            # add mating numbers to hash table.
+
+            mating_numbers[row.mating_cage_of_male] = True
+            mating_numbers[row.mating_cage_of_female] = True
+
+            # add row to hash table.
+
+            pairs[row.male_id] = True
+
+        i += 1
+
+    """ part three: extend 'batch_with_unique_mice_and_parents' if necessary. """
+
+    ideal_batch = batch_with_unique_mice_and_parents # alias.
+    unique_parents = True # indicates if pairs in 'ideal_batch' have unique parents.
+
+    i = 0
+
+    while i < length and cur_batch_size < ideal_batch_size:
+        
+        # retrieve row from 'batch_with_unique_mice'.
+
+        row = batch_with_unique_mice[i]
+
+        # if row not yet used in 'ideal_batch'.
+
+        if row.male_id not in pairs:
+            ideal_batch.append(row)
+            cur_batch_size += 1
+
+        i += 1
+
+
+    if i > 0:
+        unique_parents = False
+
+    return (ideal_batch, cur_batch_size, unique_parents)
 
 """ display assembled batch in terminal. """
 
 from textwrap import dedent
 
-def display(stock, cur_batch_size, ideal_batch_size, batch):
+def display(stock, cur_batch_size, ideal_batch_size, batch, unique_parents):
     # if no pairs could be generated.
 
     if (cur_batch_size == 0):
@@ -94,7 +167,7 @@ def display(stock, cur_batch_size, ideal_batch_size, batch):
     # if at least one pair generated.
 
     header = f'batch generated for the stock: "{stock}"'
-    status = f'{"successfully made" if (cur_batch_size == ideal_batch_size) else "only could make"} {cur_batch_size} distinct (female, male) pairs:'
+    status = f'{"successfully made" if (cur_batch_size == ideal_batch_size) else "only could make"} {cur_batch_size} unique non-sibling pairs. existing mating cages {"were only used once" if unique_parents else "were used more than once"} for this batch.'
 
     # 'header' and 'status' are indented with spaces in 'message'.
     # the 'dedent' function requires every line in string to be prefixed with identical whitespace.
@@ -102,11 +175,16 @@ def display(stock, cur_batch_size, ideal_batch_size, batch):
     # thus, each pair in batch should be indented using spaces.
 
     tab = ' ' * 8
+
+    schema = f'the format below is...\n{tab}(female, mating_cage_female_was_taken_from, male, mating_cage_male_was_taken_from).'
     batch_as_string = ''.join([('\n' + tab + str(pair)) for pair in batch])
 
     message = f"""
         {header}
+
         {status}
+
+        {schema}
         {batch_as_string}
     """
 
@@ -114,7 +192,7 @@ def display(stock, cur_batch_size, ideal_batch_size, batch):
 
     print(message)
 
-    return (header, status, message)
+    return (header, status, schema, message)
 
 """ prompt colony manager for email address. """
 
@@ -145,7 +223,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 
-def send(receiver, header, status, batch, plain_text_alternative):
+def send(receiver, header, status, schema, batch, plain_text_alternative):
     load_dotenv()
 
     try:
@@ -176,13 +254,23 @@ def send(receiver, header, status, batch, plain_text_alternative):
 
             ## email as html.
 
+            schema = schema.split('\n')
+            schema[1] = schema[1].strip()
+
             batch_as_html = ''.join([('<li>' + str(pair) + '</li>') for pair in batch])
 
             html = f"""
                 <h1 style = 'font-size: 1.2rem'>{header}</h1>
                 <em style = 'font-size: 1.1rem'>{status}</em>
 
-                <ol style = 'font-size: 1rem'>
+                
+                <p style = 'font-size: 1.1rem'>
+                    {schema[0]}
+                    <br>
+                    <b>{schema[1]}</b>
+                </p>
+
+                <ol style = 'font-size: 1.1rem'>
                     {batch_as_html}
                 </ol>
             """

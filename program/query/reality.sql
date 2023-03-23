@@ -17,7 +17,9 @@ WITH sires_and_dams AS (
 
 SELECT
 	f.id AS "female_id", /* the colony manager expects (female, male) pairs. */
-	m.id AS "male_id" 
+	f."mating number" AS "mating_cage_of_female",
+	m.id AS "male_id",
+	m."mating number" AS "mating_cage_of_male"
 FROM mice m 
 INNER JOIN mice f 
 ON (
