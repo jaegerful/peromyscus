@@ -13,6 +13,10 @@ connection.setencoding(encoding = 'utf-8')
 
 cursor = connection.cursor()
 
+""" show title. """
+
+parts.title()
+
 """ prompt colony manager for batch parameters. """
 
 stock, ideal_batch_size = parts.parameters()

@@ -1,16 +1,32 @@
 """ these functions are used by 'index.py'. """
 
+""" show tite. """
+
+def title():
+    print('\ngenerator for non-sibling mating pairs.\n')
+
 """ prompt colony manager for batch parameters. """
 
 def parameters():
-    print("\ngenerator for non-sibling mating pairs.\n")
-
     stock = input('1. which stock do you want mating pairs for (e.g. SMLNJ)? ')
     stock = stock.strip() # trim string.
 
     ideal_batch_size = input('2. how many pairs do you need (e.g. 25)? ')
 
-    while not ideal_batch_size.isdigit():
+    # while 'ideal_batch_size' is not a natural number.
+
+    first_input_error = True
+
+    while not ideal_batch_size.isdigit() or int(ideal_batch_size) <= 0:
+        
+        # if first iteration, add line break.
+        
+        if first_input_error:
+            print()
+            first_input_error = False
+            
+        # request input for 'ideal_batch_size'.
+
         ideal_batch_size = input('that was not a valid number. how many pairs do you need? ')
 
     ideal_batch_size = int(ideal_batch_size)
