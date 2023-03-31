@@ -27,11 +27,11 @@ parts.query(stock, cursor)
 
 """ make batch. """
 
-batch, cur_batch_size, unique_parents = parts.assemble(cursor, ideal_batch_size)
+batch, cur_batch_size, pairs_have_unique_parents = parts.assemble(cursor, ideal_batch_size)
 
 """ display batch. """
 
-header, status, schema, message_displayed = parts.display(stock, cur_batch_size, ideal_batch_size, batch, unique_parents)
+header, status, schema, message_displayed = parts.display(stock, cur_batch_size, ideal_batch_size, batch, pairs_have_unique_parents)
 
 """ prompt colony manager for email address. """
 

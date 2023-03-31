@@ -133,7 +133,7 @@ def assemble(cursor, ideal_batch_size):
     """ part three: extend 'batch_with_unique_mice_and_parents' if necessary. """
 
     ideal_batch = batch_with_unique_mice_and_parents # alias.
-    unique_parents = True # indicates if pairs in 'ideal_batch' have unique parents.
+    pairs_have_unique_parents = True # remains true if all pairs in 'ideal_batch' have unique parents.
 
     i = 0
 
@@ -153,9 +153,9 @@ def assemble(cursor, ideal_batch_size):
 
 
     if i > 0:
-        unique_parents = False
+        pairs_have_unique_parents = False
 
-    return (ideal_batch, cur_batch_size, unique_parents)
+    return (ideal_batch, cur_batch_size, pairs_have_unique_parents)
 
 """ display assembled batch in terminal. """
 
