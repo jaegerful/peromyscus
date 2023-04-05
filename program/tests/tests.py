@@ -143,5 +143,7 @@ class tests(base):
 
         self.assertTrue(at_least_two_pairs_share_parent)
 
+""" if 'python tests.py', run tests. """
+
 if __name__ == '__main__':
     main()
