@@ -1,6 +1,6 @@
 """ test functions from 'parts.py'. """
 
-import unittest
+from unittest import TestCase as base, main
 from unittest.mock import patch
 
 import sys
@@ -9,7 +9,7 @@ sys.path.append('..') # 'tests' must be current working directory.
 import helpers
 import parts
 
-class tests(unittest.TestCase):
+class tests(base):
 
     """ test 'parts.parameters'. """
 
@@ -17,13 +17,13 @@ class tests(unittest.TestCase):
 
         # 'parts.parameters' works with perfect input.
 
-        with patch('builtins.input', side_effect=['PD', '70']):
+        with patch('builtins.input', side_effect = ['PD', '70']):
             result = parts.parameters()
             self.assertEqual(result, ('PD', 70))
 
         # 'parts.parameters' trims batch name.
 
-        with patch('builtins.input', side_effect=['   SMLNJ   ', '30']):
+        with patch('builtins.input', side_effect = ['   SMLNJ   ', '30']):
             result = parts.parameters()
             self.assertEqual(result, ('SMLNJ', 30))
 
@@ -143,5 +143,5 @@ class tests(unittest.TestCase):
 
         self.assertTrue(at_least_two_pairs_share_parent)
 
-
-        
+if __name__ == '__main__':
+    main()
