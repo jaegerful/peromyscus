@@ -9,7 +9,7 @@ CREATE TABLE mice (
 );
 
 CREATE TABLE mating_cages (
-    "mating number" text,
+    [mating number] text,
     stock text,
     sire text,
     dam text,
