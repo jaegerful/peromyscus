@@ -5,7 +5,7 @@ CREATE TABLE mice (
     stock text,
     sex text,
     birthday text,
-    "mating number" text
+    [mating number] text
 );
 
 CREATE TABLE mating_cages (
@@ -13,7 +13,7 @@ CREATE TABLE mating_cages (
     stock text,
     sire text,
     dam text,
-    "date of mating" text
+    [date of mating] text
 );
 
 /* this function is used to process erroneous birthday fields. */
