@@ -1,10 +1,17 @@
-from pyodbc import connect, SQL_WCHAR
+from pyodbc import connect, SQL_WCHAR, dataSources
 import parts
+
+
 
 """ establish connection with database. """
 
-dsn = 'DRIVER={postgres};DATABASE=peromyscus;UID=postgres;PWD=password;SERVER=localhost;PORT=5433;'
-connection = connect(dsn)
+driver= '{Microsoft Access Driver (*.mdb, *.accdb)}'
+filepath=r'C:\Users\t\Documents\MiceLab.accdb;'
+
+myDataSources = dataSources()
+access_driver = myDataSources['MS Access Database']
+
+connection = connect(driver= access_driver, dbq=filepath, autocommit=True)
 
 connection.setdecoding(SQL_WCHAR, encoding = 'utf-8')
 connection.setencoding(encoding = 'utf-8')
@@ -12,6 +19,7 @@ connection.setencoding(encoding = 'utf-8')
 """ instantiate cursor. """
 
 cursor = connection.cursor()
+
 
 """ show title. """
 
