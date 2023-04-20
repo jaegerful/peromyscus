@@ -97,7 +97,7 @@ class tests(base):
 
         self.assertTrue(pairs_have_unique_mates)
 
-        """ second subtest: if possible, 'parts.assemble' uses only pairs with unique parents. """
+        """ third subtest: if possible, 'parts.assemble' uses only pairs with unique parents. """
 
         cursor = helpers.generate_cursor()
         batch, cur_batch_size, pairs_have_unique_parents = parts.assemble(cursor, 2)
@@ -117,7 +117,7 @@ class tests(base):
             mating_cages[pair.mating_cage_of_male] = True
             mating_cages[pair.mating_cage_of_female] = True
 
-        """ third subtest: if needed, 'parts.assemble' includes pairs with non-unique parents. """
+        """ fourth subtest: if needed, 'parts.assemble' includes pairs with non-unique parents. """
 
         cursor = helpers.generate_cursor()
         batch, cur_batch_size, pairs_have_unique_parents = parts.assemble(cursor, 4)
