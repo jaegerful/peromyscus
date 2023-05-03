@@ -1,60 +1,23 @@
-/* subquery that returns all sires and dams in 'mating_cages'. */
-
-WITH sires_and_dams AS (
-	SELECT sire
-	FROM mating_cages
-	WHERE sire IS NOT null /* check does not work if subquery has 'null'. */
-
-	UNION
-
-	SELECT dam
-	FROM mating_cages
-	WHERE dam IS NOT null
+SELECT f.id AS female_id, f.[mating number] AS mating_cage_of_female, m.id AS male_id, m.[mating number] AS mating_cage_of_male
+FROM mice AS m 
+INNER JOIN mice AS f ON (m.[mating number] <> f.[mating number] 
+AND m.stock = f.stock
+AND m.stock = ?
+AND m.sex = 'M'
+AND f.sex = 'F'
+AND IIf(IsDate(m.birthday), CDate(m.birthday), NULL) IS NOT NULL
+AND IIf(IsDate(f.birthday), CDate(f.birthday), NULL) IS NOT NULL
+AND DateDiff('d', m.birthday, Date()) <= 365 
+AND DateDiff('d', f.birthday,Date()) <= 365
 )
-
-/* generate every valid mating pair in a given stock. */
-/* males and females may appear in more than one pair. */
-
-SELECT
-	f.id AS "female_id", /* the colony manager expects (female, male) pairs. */
-	f."mating number" AS "mating_cage_of_female",
-	m.id AS "male_id",
-	m."mating number" AS "mating_cage_of_male"
-FROM mice m 
-INNER JOIN mice f 
-ON (
-	/* mice do not share parents. */
-
-	m."mating number" != f."mating number" AND
-
-	/* mice from same stock. */
-	
-	m.stock = ? AND
-	m.stock = f.stock AND
-	
-	/* mice of different sex. */
-	
-	m.sex = 'M' AND
-	f.sex = 'F' AND
-
-	/* mice born within last year. */
-	
-	try_date_cast(m.birthday) IS NOT null AND 
-	try_date_cast(f.birthday) IS NOT null AND
-	m.birthday::date >= (now() - interval '1 year')::date AND 
-	f.birthday::date >= (now() - interval '1 year')::date AND
-
-	/* mice not already used in existing mating cages. */
-	
-	m.id NOT IN (
-		SELECT *
-		FROM sires_and_dams
-	) AND
-
-	f.id NOT IN (
-		SELECT *
-		FROM sires_and_dams
-	)
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM mating_cages AS mc
+  WHERE m.id = mc.sire
+) AND NOT EXISTS (
+  SELECT 1
+  FROM mating_cages AS mc2
+  WHERE f.id = mc2.dam
 )
-
-ORDER BY m.id ASC;
+ORDER BY m.id ASC
+;

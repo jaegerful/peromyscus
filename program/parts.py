@@ -1,3 +1,4 @@
+import os
 """ these functions are used by 'index.py'. """
 
 """ show tite. """
@@ -37,15 +38,14 @@ def parameters():
 
 def query(stock, cursor):
     # retrieve query.
-    
-    query = None
 
-    with open('./query/reality.sql', 'r') as file:
-        query = file.read()
+    query = None
+    with open(r'program\query\reality.sql', 'r') as file:
+        query = file.read() 
 
     # execute query.
-
-    args = (stock,) # arguments for placeholders in query.
+    args = (stock,)
+     # arguments for placeholders in query.
     cursor.execute(query, args)
 
 """ assemble ideal batch. """
@@ -70,7 +70,7 @@ def assemble(cursor, ideal_batch_size):
         # if pair consists of unused male and female.
 
         if ((not row.male_id in mice) and (not row.female_id in mice)):
-
+        
             # add to batch.
             
             batch_with_unique_mice.append(row)
@@ -81,7 +81,6 @@ def assemble(cursor, ideal_batch_size):
             mice[row.female_id] = True
         
         row = cursor.fetchone()
-    
     """ part two: make 'batch_with_unique_mice_and_parents'. """
 
     batch_with_unique_mice_and_parents = []

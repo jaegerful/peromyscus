@@ -1,34 +1,36 @@
-from pyodbc import connect, SQL_WCHAR, dataSources
+from pyodbc import connect, SQL_WCHAR, Error, drivers, dataSources
 import parts
-
-
 
 """ establish connection with database. """
 
-driver= '{Microsoft Access Driver (*.mdb, *.accdb)}'
-filepath=r'C:\Users\t\Documents\MiceLab.accdb;'
+driver = '{Microsoft Access Driver (*.md, *.accdb)}'
+filepath = r'C:\Users\Fischer\Documents\Mice.accdb'
 
 myDataSources = dataSources()
-access_driver = myDataSources['MS Access Database']
+access_driver = myDataSources['MS Access']
 
-connection = connect(driver= access_driver, dbq=filepath, autocommit=True)
+conn = connect(driver= access_driver, dbq=filepath, autocommit=True)  
+print("connected")
 
-connection.setdecoding(SQL_WCHAR, encoding = 'utf-8')
-connection.setencoding(encoding = 'utf-8')
+conn.setdecoding(SQL_WCHAR, encoding = 'utf-8')
+conn.setencoding(encoding = 'utf-8')
+
+
 
 """ instantiate cursor. """
 
-cursor = connection.cursor()
+cursor = conn.cursor()
+
 
 
 """ show title. """
+
 
 parts.title()
 
 """ prompt colony manager for batch parameters. """
 
 stock, ideal_batch_size = parts.parameters()
-
 """ execute query. """
 
 parts.query(stock, cursor)
@@ -51,4 +53,4 @@ parts.send(receiver, header, status, schema, batch, plain_text_alternative = mes
 
 """ close connection with database. """
 
-connection.close()
+conn.close()
