@@ -307,8 +307,8 @@ def send(receiver, header, status, schema, batch, plain_text_alternative):
             this could have happened for several reasons:
 
             1. this computer is currently offline.
-            2. the email server rejected our connection.
-            3. the internal database this program uses to temporarily store batches failed.
+            2. the credentials for the dedicated email account are corrupt.
+            3. the email server rejected our connection.
         """
 
         message = dedent(message)
