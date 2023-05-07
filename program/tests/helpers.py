@@ -1,5 +1,19 @@
 """ helpers to test 'parts.assemble'. """
 
+# import or reload 'engine' module.
+
+import importlib
+
+def import_engine(engine = None):
+    if engine == None:
+        engine = importlib.import_module('engine')
+    else:
+        importlib.reload(engine)
+
+    engine.query = lambda _: True # mock 'engine.query'.
+
+    return engine # return 'engine' module.
+
 # mock rows from query.
 
 class pair:

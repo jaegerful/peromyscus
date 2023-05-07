@@ -1,2 +1,3 @@
 pyodbc==4.0.35
 python-dotenv==1.0.0
+eel==0.16.0
