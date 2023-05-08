@@ -31,10 +31,6 @@
         /* checks for valid input. */
 
         const checks = {
-            'both': {
-                'result': parameters.stock !== null || parameters.size !== null,
-                'message': 'Both fields are required.',
-            },
             'stock': {
                 'result': parameters.stock !== null && parameters.stock.length !== 0,
                 'message': 'Stock ID is required.',
@@ -43,6 +39,11 @@
                 'result': parameters.size !== null && parameters.size > 0,
                 'message': 'Number of pairs must be greater than or equal to 1.',
             },
+        }
+
+        checks.both = {
+            'result': checks.stock.result || parameters.size !== null,
+            'message': 'Both fields are required.',
         }
 
         /* if input invalid, show notification message. */

@@ -14,7 +14,7 @@
 
 <style>
     div {
-        width: 50vw;
+        min-width: 50vw;
         border-radius: 0.65rem;
 
         background-color: var(--dark-gray);

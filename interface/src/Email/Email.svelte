@@ -55,7 +55,7 @@
         
         if (status === false) {
             notification.category = 'error'
-            notification.message = `Email could not be sent to ${email}.`
+            notification.message = `Failed to connect to email server. Please check your Internet connection.`
             notification.show = true
 
             setTimeout(() => notification.show = false, 2500)
