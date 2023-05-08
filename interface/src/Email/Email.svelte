@@ -27,7 +27,7 @@
         const checks = {
             'empty': {
                 'result': email.length !== 0,
-                'message': 'Email address is missing.',
+                'message': 'Email address is required.',
             },
             'format': {
                 'result': email.includes('@') && email.includes('.'),

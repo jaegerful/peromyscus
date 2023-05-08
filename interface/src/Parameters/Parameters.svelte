@@ -31,9 +31,13 @@
         /* checks for valid input. */
 
         const checks = {
+            'both': {
+                'result': parameters.stock !== null || parameters.size !== null,
+                'message': 'Both fields are required.',
+            },
             'stock': {
                 'result': parameters.stock !== null && parameters.stock.length !== 0,
-                'message': 'Stock ID is missing.',
+                'message': 'Stock ID is required.',
             },
             'size': {
                 'result': parameters.size !== null && parameters.size > 0,
@@ -45,7 +49,7 @@
 
         if (!(checks.stock.result && checks.size.result)) {
             notification.category = 'warning'
-            notification.message = !(checks.stock.result) ? checks.stock.message : checks.size.message
+            notification.message = !checks.both.result ? checks.both.message : (!checks.stock.result ? checks.stock.message : checks.size.message)
             notification.show = true
          
             setTimeout(() => notification.show = false, 2500)
