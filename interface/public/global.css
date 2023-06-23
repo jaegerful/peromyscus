@@ -1,0 +1,128 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    font-family: Helvetica, sans-serif;
+    font-size: 1rem;
+    color: white;
+
+    --yellow: #a6820c;
+    --green: rgba(0, 128, 0, 0.765);
+    --light-gray: #4d4d4d;
+    --dark-gray: #272727;
+}
+
+body {
+    background-color: black;
+}
+
+#app {
+    min-height: 100vh;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+input {
+    width: 33vw;
+    box-shadow: 0.3rem 0.3rem var(--light-gray);
+
+    border: none;
+    border-radius: 0.65rem;
+
+    background-color: var(--dark-gray);
+    padding: 0.7rem 1rem;
+
+    font-size: inherit;
+    font-weight: 600;
+    color: white;
+
+    outline: none;
+}
+
+button {
+    box-shadow: 0.3rem 0.3rem var(--green);
+
+    border: none;
+    border-radius: 0.65rem;
+
+    background-color: var(--dark-gray);
+    padding: 0.6rem 1rem;
+    
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 300;
+    letter-spacing: 0.015rem;
+    color: white;
+    
+    opacity: 0.9;
+}
+
+button:hover {
+    cursor: pointer;
+    opacity: 1;
+}
+
+table {
+    display: block;
+    width: fit-content;
+    height: 45vh;
+
+    border-spacing: 1rem;
+
+    margin-bottom: 5rem;
+
+    overflow-y: scroll;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+}
+
+th {
+    box-shadow: 0.2rem 0.2rem var(--light-gray);
+    
+    border: none;
+    border-radius: 0.65rem;
+    
+    background-color: var(--dark-gray);
+    padding: 0.5rem 1rem;
+    
+    font-size: inherit;
+    font-weight: 600;
+    color: white;
+    
+    outline: none;
+}
+
+td {
+    padding: 0.5rem;
+
+    font-weight: 300;
+    text-align: center;
+}
+
+/* scrollbar for 'table' element. */
+
+table::-webkit-scrollbar {
+	width: 0.7rem;
+	background-color: #6C6A6A;
+}
+
+table::-webkit-scrollbar-thumb {
+	border-radius: 1rem;
+}
+
+table::-webkit-scrollbar-thumb {
+	background-color: hsla(0deg 0% 100% / 60%);
+}
+
+table::-webkit-scrollbar-thumb:hover {
+	background-color: hsla(0deg 0% 100% / 80%);
+}

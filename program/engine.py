@@ -1,42 +1,11 @@
-import os
-""" these functions are used by 'index.py'. """
+""" functions exposed to 'eel'. """
 
-""" show tite. """
-
-def title():
-    print('\ngenerator for non-sibling mating pairs.\n')
-
-""" prompt colony manager for batch parameters. """
-
-def parameters():
-    stock = input('1. which stock do you want mating pairs for (e.g. SMLNJ)? ')
-    stock = stock.strip() # trim string.
-
-    ideal_batch_size = input('2. how many pairs do you need (e.g. 25)? ')
-
-    # while 'ideal_batch_size' is not a natural number.
-
-    first_input_error = True
-
-    while not ideal_batch_size.isdigit() or int(ideal_batch_size) <= 0:
-        
-        # if first iteration, add line break.
-        
-        if first_input_error:
-            print()
-            first_input_error = False
-            
-        # request input for 'ideal_batch_size'.
-
-        ideal_batch_size = input('that was not a valid number. how many pairs do you need? ')
-
-    ideal_batch_size = int(ideal_batch_size)
-
-    return (stock, ideal_batch_size)
+from database import cursor
+import eel
 
 """ retrieve and execute query. """
 
-def query(stock, cursor):
+def query(stock):
     # retrieve query.
 
     query = None
@@ -48,11 +17,26 @@ def query(stock, cursor):
      # arguments for placeholders in query.
     cursor.execute(query, args)
 
+""" converts 'pyodbc' row to dictionary. """
+
+def represent(row):
+    return {
+        'female_id': row.female_id,
+        'mating_cage_of_female': row.mating_cage_of_female,
+        'male_id': row.male_id,
+        'mating_cage_of_male': row.mating_cage_of_male,
+    }
+
 """ assemble ideal batch. """
 
-def assemble(cursor, ideal_batch_size):
+@eel.expose
+def assemble(stock, ideal_batch_size):
     
-    """ part one: make 'batch_with_unique_mice'. """
+    """ part one: execute query. """
+
+    query(stock)
+
+    """ part two: make 'batch_with_unique_mice'. """
     
     batch_with_unique_mice = []
 
@@ -81,7 +65,12 @@ def assemble(cursor, ideal_batch_size):
             mice[row.female_id] = True
         
         row = cursor.fetchone()
+<<<<<<< HEAD:program/parts.py
     """ part two: make 'batch_with_unique_mice_and_parents'. """
+=======
+    
+    """ part three: make 'batch_with_unique_mice_and_parents'. """
+>>>>>>> postgres:program/engine.py
 
     batch_with_unique_mice_and_parents = []
     cur_batch_size = 0
@@ -129,7 +118,7 @@ def assemble(cursor, ideal_batch_size):
 
         i += 1
 
-    """ part three: extend 'batch_with_unique_mice_and_parents' if necessary. """
+    """ part four: extend 'batch_with_unique_mice_and_parents' if necessary. """
 
     ideal_batch = batch_with_unique_mice_and_parents # alias.
     pairs_have_unique_parents = True # remains true if all pairs in 'ideal_batch' have unique parents.
@@ -154,35 +143,23 @@ def assemble(cursor, ideal_batch_size):
     if i > 0:
         pairs_have_unique_parents = False
 
-    return (ideal_batch, cur_batch_size, pairs_have_unique_parents)
+    # convert rows to dictionaries.
 
-""" display assembled batch in terminal. """
+    batch = list(map(represent, ideal_batch))
+
+    # return results.
+
+    return {'batch': batch, 'unique_parents': pairs_have_unique_parents}
+
+""" generate description for assembled batch. """
 
 from textwrap import dedent
 
+@eel.expose
 def display(stock, cur_batch_size, ideal_batch_size, batch, unique_parents):
-    # if no pairs could be generated.
 
-    if (cur_batch_size == 0):
-        message = f"""
-            could not generate any pairs for the stock: "{stock}".
-        
-            this could have happened for several reasons:
-
-            1. "{stock}" may not exist (capitalization may be wrong).
-            2. the database may not be up to date.
-            3. there may simply not exist any possible non-sibling pairs.
-        """
-
-        message = dedent(message)
-        print(message)
-        
-        quit()
-
-    # if at least one pair generated.
-
-    header = f'batch generated for the stock: "{stock}"'
-    status = f'{"successfully made" if (cur_batch_size == ideal_batch_size) else "only could make"} {cur_batch_size} unique non-sibling pairs. existing mating cages {"were only used once" if unique_parents else "were used more than once"} for this batch.'
+    header = f'Batch generated for the stock: "{stock}"'
+    status = f'{"Successfully made" if (cur_batch_size == ideal_batch_size) else "only could make"} {cur_batch_size} unique non-sibling pair{"" if cur_batch_size == 1 else "s"}. Existing mating cages {"were only used once" if unique_parents else "were used more than once"} for this batch.'
 
     # 'header' and 'status' are indented with spaces in 'message'.
     # the 'dedent' function requires every line in string to be prefixed with identical whitespace.
@@ -191,12 +168,10 @@ def display(stock, cur_batch_size, ideal_batch_size, batch, unique_parents):
 
     tab = ' ' * 8
 
-    schema = f'the format below is...\n{tab}(female, mating_cage_female_was_taken_from, male, mating_cage_male_was_taken_from).'
-    batch_as_string = ''.join([('\n' + tab + str(pair)) for pair in batch])
+    schema = f'(female_id, mating_cage_female_was_taken_from, male_id, mating_cage_male_was_taken_from)'
+    batch_as_string = ''.join([('\n' + tab + str(tuple(pair.values()))) for pair in batch])
 
     message = f"""
-        {header}
-
         {status}
 
         {schema}
@@ -205,29 +180,7 @@ def display(stock, cur_batch_size, ideal_batch_size, batch, unique_parents):
 
     message = dedent(message)
 
-    print(message)
-
-    return (header, status, schema, message)
-
-""" prompt colony manager for email address. """
-
-def address():
-    receiver = None
-
-    while True:
-        receiver = input('what email should receive a copy of this batch (e.g. alex@gmail.com)? ')
-        receiver = receiver.strip()
-
-        confirmation = input(f'is this email correct? {receiver} (y/n): ') 
-        confirmation = confirmation.strip()
-        confirmation = confirmation.lower()
-
-        if confirmation == 'y':
-            break
-
-        print()
-
-    return receiver
+    return {'header': header, 'status': status, 'schema': schema, 'message': message}
 
 """ send email to colony manager with batch contents. """
 
@@ -238,7 +191,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 
-def send(receiver, header, status, schema, batch, plain_text_alternative):
+@eel.expose
+def send(header, status, schema, plain_text_alternative, batch, receiver):
     load_dotenv()
 
     try:
@@ -269,10 +223,9 @@ def send(receiver, header, status, schema, batch, plain_text_alternative):
 
             ## email as html.
 
-            schema = schema.split('\n')
-            schema[1] = schema[1].strip()
+            schema = schema.strip()
 
-            batch_as_html = ''.join([('<li>' + str(pair) + '</li>') for pair in batch])
+            batch_as_html = ''.join([('<li>' + str(tuple(pair.values())) + '</li>') for pair in batch])
 
             html = f"""
                 <h1 style = 'font-size: 1.2rem'>{header}</h1>
@@ -280,9 +233,7 @@ def send(receiver, header, status, schema, batch, plain_text_alternative):
 
                 
                 <p style = 'font-size: 1.1rem'>
-                    {schema[0]}
-                    <br>
-                    <b>{schema[1]}</b>
+                    <b>{schema}</b>
                 </p>
 
                 <ol style = 'font-size: 1.1rem'>
@@ -297,20 +248,14 @@ def send(receiver, header, status, schema, batch, plain_text_alternative):
 
             smtp.sendmail(sender, receiver, email.as_string())
 
-            print(f'\nbatch was sent successfully to {receiver}.\n')
+            return True
 
-    except:
-        message = f"""
-            an error occurred.
-        
-            this could have happened for several reasons:
+    except Exception as error:
+        print(error)
+        return False
+    
+""" start application. """
 
-            1. this computer is currently offline.
-            2. the email server rejected our connection.
-            3. the internal database this program uses to temporarily store batches failed.
-        """
-
-        message = dedent(message)
-        print(message)
-
-        quit()
+if __name__ == '__main__':
+    eel.init('web')
+    eel.start('index.html')
