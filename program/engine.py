@@ -65,12 +65,8 @@ def assemble(stock, ideal_batch_size):
             mice[row.female_id] = True
         
         row = cursor.fetchone()
-<<<<<<< HEAD:program/parts.py
-    """ part two: make 'batch_with_unique_mice_and_parents'. """
-=======
     
     """ part three: make 'batch_with_unique_mice_and_parents'. """
->>>>>>> postgres:program/engine.py
 
     batch_with_unique_mice_and_parents = []
     cur_batch_size = 0
