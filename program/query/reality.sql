@@ -1,23 +1,31 @@
-SELECT f.id AS female_id, f.[mating number] AS mating_cage_of_female, m.id AS male_id, m.[mating number] AS mating_cage_of_male
-FROM mice AS m 
-INNER JOIN mice AS f ON (m.[mating number] <> f.[mating number] 
-AND m.stock = f.stock
-AND m.stock = ?
-AND m.sex = 'M'
-AND f.sex = 'F'
-AND IIf(IsDate(m.birthday), CDate(m.birthday), NULL) IS NOT NULL
-AND IIf(IsDate(f.birthday), CDate(f.birthday), NULL) IS NOT NULL
-AND DateDiff('d', m.birthday, Date()) <= 365 
-AND DateDiff('d', f.birthday,Date()) <= 365
+SELECT 
+    female.ID AS female_id,
+    female.[Mating Number] AS mating_cage_of_female,
+    male.ID AS male_id,
+    male.[Mating Number] AS mating_cage_of_male
+FROM Peromyscus AS male
+INNER JOIN Peromyscus AS female
+ON (
+    male.[Mating Number] <> female.[Mating Number] AND
+    male.stock = female.stock AND
+    male.stock = ? AND
+    male.sex = 'M' AND
+    female.sex = 'F' AND
+    IIf(IsDate(male.birthday), 1, NULL) IS NOT NULL AND
+    IIf(IsDate(female.birthday), 1, NULL) IS NOT NULL AND
+    DateDiff('d', CDate(male.birthday), Date()) <= 365 AND
+    DateDiff('d', CDate(female.birthday), Date()) <= 365
 )
-WHERE NOT EXISTS (
-  SELECT 1
-  FROM mating_cages AS mc
-  WHERE m.id = mc.sire
-) AND NOT EXISTS (
-  SELECT 1
-  FROM mating_cages AS mc2
-  WHERE f.id = mc2.dam
-)
-ORDER BY m.id ASC
-;
+WHERE 
+    NOT EXISTS (
+        SELECT 1
+        FROM [Mating Records] AS mating_cages
+        WHERE male.ID = mating_cages.sire
+    ) 
+    AND
+    NOT EXISTS (
+        SELECT 1
+        FROM [Mating Records] AS mating_cages
+        WHERE female.ID = mating_cages.dam
+    )
+ORDER BY male.ID ASC;
