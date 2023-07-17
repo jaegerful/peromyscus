@@ -3,6 +3,11 @@
 from database import cursor
 import eel
 
+""" global variables. """
+
+from os import path
+directory = path.dirname(path.abspath(__file__)) # absolute path to 'program' directory.
+
 """ retrieve and execute query. """
 
 def query(stock):
@@ -10,7 +15,7 @@ def query(stock):
     
     query = None
 
-    with open('./query/reality.sql', 'r') as file:
+    with open(path.join(directory, 'query', 'reality.sql'), 'r') as file:
         query = file.read()
 
     # execute query.
@@ -156,7 +161,7 @@ from textwrap import dedent
 def display(stock, cur_batch_size, ideal_batch_size, batch, unique_parents):
 
     header = f'Batch generated for the stock: "{stock}"'
-    status = f'{"Successfully made" if (cur_batch_size == ideal_batch_size) else "only could make"} {cur_batch_size} unique non-sibling pair{"" if cur_batch_size == 1 else "s"}. Existing mating cages {"were only used once" if unique_parents else "were used more than once"} for this batch.'
+    status = f'{"Successfully made" if (cur_batch_size == ideal_batch_size) else "Only could make"} {cur_batch_size} unique non-sibling pair{"" if cur_batch_size == 1 else "s"}. Existing mating cages {"were only used once" if unique_parents else "were used more than once"} for this batch.'
 
     # 'header' and 'status' are indented with spaces in 'message'.
     # the 'dedent' function requires every line in string to be prefixed with identical whitespace.
@@ -190,7 +195,7 @@ import smtplib
 
 @eel.expose
 def send(header, status, schema, plain_text_alternative, batch, receiver):
-    load_dotenv()
+    load_dotenv(dotenv_path = path.join(directory, '.env'))
 
     try:
 
@@ -248,7 +253,7 @@ def send(header, status, schema, plain_text_alternative, batch, receiver):
             return True
 
     except Exception as error:
-        print(error)
+        print(f'error: {error}.')
         return False
     
 """ start application. """
