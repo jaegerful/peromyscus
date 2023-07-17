@@ -1,9 +1,11 @@
 """ establish connection with database. """
 
-from pyodbc import connect, SQL_WCHAR
+from pyodbc import connect, SQL_WCHAR, dataSources
 
-dsn = 'DRIVER={postgres};DATABASE=peromyscus;UID=postgres;PWD=password;SERVER=localhost;PORT=5433;'
-connection = connect(dsn)
+driver = dataSources()['MS Access']
+path = '' # must replete w/ path to database.
+
+connection = connect(driver = driver, dbq = path)
 
 connection.setdecoding(SQL_WCHAR, encoding = 'utf-8')
 connection.setencoding(encoding = 'utf-8')
