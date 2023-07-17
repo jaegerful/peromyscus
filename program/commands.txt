@@ -1,0 +1,2 @@
+how to package application:
+pyinstaller engine.py --onefile --add-data query:query --add-data web:web --add-data .env:.
