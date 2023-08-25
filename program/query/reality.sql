@@ -7,14 +7,14 @@ FROM Peromyscus AS male
 INNER JOIN Peromyscus AS female
 ON (
     male.[Mating Number] <> female.[Mating Number] AND
+    male.ID IS NOT NULL AND
+    female.ID IS NOT NULL AND
     male.stock = female.stock AND
     male.stock = ? AND
     male.sex = 'M' AND
     female.sex = 'F' AND
-    IIf(IsDate(male.birthday), 1, NULL) IS NOT NULL AND
-    IIf(IsDate(female.birthday), 1, NULL) IS NOT NULL AND
-    DateDiff('d', CDate(male.birthday), Date()) <= 365 AND
-    DateDiff('d', CDate(female.birthday), Date()) <= 365
+    DateDiff('d', male.birthday, Date()) <= 365 AND
+    DateDiff('d', female.birthday, Date()) <= 365
 )
 WHERE 
     NOT EXISTS (
